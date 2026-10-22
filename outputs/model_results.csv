@@ -1,0 +1,3 @@
+model,accuracy,pneumonia_precision,pneumonia_recall,pneumonia_f1
+CNN,0.54,0.5256410256410257,0.82,0.640625
+MobileNetV2,0.7325,0.722488038277512,0.755,0.7383863080684596
