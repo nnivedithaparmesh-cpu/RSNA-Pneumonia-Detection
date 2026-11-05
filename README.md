@@ -43,7 +43,7 @@ The project uses the **RSNA Pneumonia Detection Challenge** dataset.
 
 Dataset source:
 
-https://www.kaggle.com/competitions/rsna-pneumonia-detection-challenge/data
+[RSNA Pneumonia Detection Challenge dataset](https://www.kaggle.com/competitions/rsna-pneumonia-detection-challenge/data)
 
 The dataset contains chest X-ray images in DICOM format and corresponding labels.
 
@@ -66,8 +66,10 @@ The dataset is not included in this repository because of its large size.
 
 ## 5. Project Structure
 
+The `data/` folder is added locally after downloading the dataset.
+
 ```text
-RSNA_Pneumonia_VSCode_Project/
+RSNA-Pneumonia-Detection/
 │
 ├── data/
 │   ├── stage_2_train_labels.csv
@@ -75,7 +77,6 @@ RSNA_Pneumonia_VSCode_Project/
 │
 ├── outputs/
 │   ├── best_pneumonia_model.keras
-│   ├── best_pneumonia_model_compatible.keras
 │   ├── pneumonia_cnn_model.keras
 │   ├── mobilenetv2_pneumonia_model.keras
 │   ├── model_results.csv
@@ -83,11 +84,8 @@ RSNA_Pneumonia_VSCode_Project/
 │   ├── mobilenetv2_confusion_matrix.png
 │   └── mobilenetv2_training_curves.png
 │
-├── outputs_small_test/
-│
 ├── train.py
 ├── predict.py
-├── fix_model.py
 ├── requirements.txt
 ├── README.md
 └── .gitignore
@@ -147,7 +145,7 @@ The models are evaluated using the following metrics:
 
 ### Experimental Results
 
-The following results were obtained from the balanced 400-image test set.
+The saved metrics in `outputs/model_results.csv` match the results below. The experiment used a balanced 400-image test set.
 
 | Evaluation Metric | CNN | MobileNetV2 |
 |---|---:|---:|
@@ -240,32 +238,24 @@ The training process saves the trained models, evaluation metrics, and visualiza
 
 ## 11. Model Compatibility
 
-The saved model may contain older Keras configuration fields that are not supported by the currently installed Keras version.
-
-The `fix_model.py` script creates a compatible copy of the original trained model.
-
-Run:
-
-```powershell
-python fix_model.py
-```
-
-The script creates:
+The prediction script loads the saved MobileNetV2 model:
 
 ```text
-outputs/best_pneumonia_model_compatible.keras
+outputs/best_pneumonia_model.keras
 ```
 
-The original trained model remains unchanged.
+Use a TensorFlow/Keras version compatible with the saved model. If loading fails because of unsupported configuration fields, check the installed package versions or retrain the model in the current environment.
+
+This repository does not include `fix_model.py` or `best_pneumonia_model_compatible.keras`.
 
 ## 12. Running Predictions
 
 The `predict.py` script performs pneumonia classification on an individual chest X-ray image.
 
-The prediction script uses the compatible MobileNetV2 model:
+The prediction script uses the saved MobileNetV2 model:
 
 ```text
-outputs/best_pneumonia_model_compatible.keras
+outputs/best_pneumonia_model.keras
 ```
 
 ### A. Prediction Using a DICOM Image
@@ -305,8 +295,7 @@ The `outputs/` directory contains:
 |---|---|
 | `pneumonia_cnn_model.keras` | Trained CNN model |
 | `mobilenetv2_pneumonia_model.keras` | Trained MobileNetV2 model |
-| `best_pneumonia_model.keras` | Original best model |
-| `best_pneumonia_model_compatible.keras` | Compatible model copy for prediction |
+| `best_pneumonia_model.keras` | Best MobileNetV2 checkpoint by validation loss, used for prediction |
 | `model_results.csv` | Model evaluation metrics |
 | `cnn_confusion_matrix.png` | CNN confusion matrix |
 | `mobilenetv2_confusion_matrix.png` | MobileNetV2 confusion matrix |
