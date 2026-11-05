@@ -10,6 +10,15 @@ from PIL import Image
 IMAGE_SIZE = 224
 
 
+class CompatibleGlorotUniform(tf.keras.initializers.GlorotUniform):
+    @classmethod
+    def from_config(cls, config):
+        config = dict(config)
+        config.pop("input_axes", None)
+        config.pop("output_axes", None)
+        return cls(**config)
+
+
 def load_xray(image_path):
     image_path = Path(image_path)
 
@@ -25,7 +34,7 @@ def load_xray(image_path):
             dtype=np.float32
         )
 
-    # Same normalization approach as the training script
+    # Normalize image
     lo, hi = float(arr.min()), float(arr.max())
 
     if hi > lo:
@@ -33,10 +42,11 @@ def load_xray(image_path):
     else:
         arr = np.zeros_like(arr, dtype=np.float32)
 
-    # Resize to model input dimensions
+    # Resize to 224 x 224
     arr = np.asarray(
         Image.fromarray(arr).resize(
-            (IMAGE_SIZE, IMAGE_SIZE)
+            (IMAGE_SIZE, IMAGE_SIZE),
+            resample=Image.Resampling.BILINEAR
         ),
         dtype=np.float32
     )
@@ -61,15 +71,23 @@ def main():
 
     args = parser.parse_args()
 
-    model_path = Path("outputs/best_pneumonia_model.keras")
-
+    model_path = Path(
+        "outputs_corrected/mobilenetv2_pneumonia_model.keras"
+)
     if not model_path.exists():
         raise FileNotFoundError(
             f"Trained model not found: {model_path}"
         )
 
     print("Loading trained model...")
-    model = tf.keras.models.load_model(model_path)
+
+    model = tf.keras.models.load_model(
+        model_path,
+        custom_objects={
+            "GlorotUniform": CompatibleGlorotUniform
+        },
+        compile=False
+    )
 
     print("Processing X-ray...")
     image = load_xray(args.image)
